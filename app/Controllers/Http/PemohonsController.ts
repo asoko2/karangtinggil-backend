@@ -9,22 +9,43 @@ import User from 'App/Models/User'
 import Database from '@ioc:Adonis/Lucid/Database'
 
 export default class PemohonsController {
-  public async index({ request }: HttpContextContract) {
+  public async index({ request, response }: HttpContextContract) {
     const perPage = request.input('limit', 5)
     const pageInput = request.input('page', 0)
     const search = request.input('search')
-    // const offset = params.offset
-    const pemohons = search
-      ? await Pemohon.query()
-          .where('nama', 'like', `%${search}%`)
-          .orWhere('nik', 'like', `%${search}%`)
-          .orderBy('id', 'asc')
-          .paginate(parseInt(pageInput) + 1, perPage)
-      : await Pemohon.query()
-          .orderBy('id', 'asc')
-          .paginate(parseInt(pageInput) + 1, perPage)
+    const filterType = request.input('filterType')
+    const filter = request.input('filter')
 
-    return pemohons
+    let sql = `SELECT * FROM pemohons WHERE (nama like '%${search}%' OR nik like '%${search}%') `
+    sql +=
+      filterType == 1
+        ? `AND date(tanggal_lahir) = '${filter}' `
+        : filterType == 2
+        ? `AND extract(month from tanggal_lahir) = ${filter} `
+        : filterType == 3
+        ? `AND extract(year from tanggal_lahir) = ${filter} `
+        : ''
+    const total = await Database.rawQuery(sql)
+    sql += `ORDER BY id ASC LIMIT ${perPage} OFFSET ${parseInt(pageInput) * perPage}`
+
+    const pemohons = await Database.rawQuery(sql)
+    const current_page = parseInt(pageInput) + 1
+    const last_page = Math.ceil(total.rowCount / perPage)
+
+    return response.json({
+      meta: {
+        total: total.rowCount,
+        per_page: parseInt(perPage),
+        current_page: current_page,
+        last_page: last_page,
+        first_page: 1,
+        first_page_url: '/?page=1',
+        last_page_url: `/?page=${last_page}`,
+        next_page_url: `/?page=${current_page + 1}`,
+        previous_page_url: current_page == 1 ? null : `/?page=${current_page - 1}`,
+      },
+      data: pemohons.rows,
+    })
   }
 
   public async getAll() {

@@ -27,7 +27,6 @@ export default class SkcksController {
         : ''
     const total = await Database.rawQuery(sql)
     sql += `ORDER BY skcks.id DESC LIMIT ${perPage} OFFSET ${parseInt(pageInput) * perPage}`
-    console.log(sql)
     const skcks = await Database.rawQuery(sql)
     const current_page = parseInt(pageInput) + 1
     const last_page = Math.ceil(total.rowCount / perPage)
