@@ -92,20 +92,6 @@ export default class PemohonsController {
     const ts = new Date().valueOf()
     const fileName = ts + '.' + ext
 
-    const data = {
-      nik: dataValidated.nik,
-      tempat_lahir: dataValidated.tempat_lahir,
-      tanggal_lahir: dataValidated.tanggal_lahir,
-      jenis_kelamin: dataValidated.jenis_kelamin,
-      kewarganegaraan: dataValidated.kewarganegaraan,
-      agama: dataValidated.agama,
-      pekerjaan: dataValidated.pekerjaan,
-      telpon: dataValidated.telpon,
-      alamat: dataValidated.alamat,
-      nama: dataValidated.nama,
-      kk: fileName,
-    }
-
     const userData = {
       username: userValidated.username,
       password: 'pemohon',
@@ -121,8 +107,24 @@ export default class PemohonsController {
       console.log(kk?.errors)
     }
     try {
+      const user = await User.create(userData)
+
+      const data = {
+        nik: dataValidated.nik,
+        tempat_lahir: dataValidated.tempat_lahir,
+        tanggal_lahir: dataValidated.tanggal_lahir,
+        jenis_kelamin: dataValidated.jenis_kelamin,
+        kewarganegaraan: dataValidated.kewarganegaraan,
+        agama: dataValidated.agama,
+        pekerjaan: dataValidated.pekerjaan,
+        telpon: dataValidated.telpon,
+        alamat: dataValidated.alamat,
+        nama: dataValidated.nama,
+        kk: fileName,
+        user_id: user.id,
+      }
+
       await Pemohon.create(data)
-      await User.create(userData)
       return response.created()
     } catch (error) {
       return response.badRequest(error)

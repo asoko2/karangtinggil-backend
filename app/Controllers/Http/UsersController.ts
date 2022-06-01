@@ -14,17 +14,29 @@ export default class UsersController {
       level: schema.number(),
     })
 
-    const pemohonSchema = schema.create({
-      nik: schema.string({ trim: true }, [rules.unique({ table: 'pemohons', column: 'nik' })]),
-      nama: schema.string(),
-    })
-
     const data = await request.validate({ schema: userSchema })
-    const pemohonData = await request.validate({ schema: pemohonSchema })
 
     try {
       const user = await User.create(data)
-      await Pemohon.create(pemohonData)
+
+      const pemohonSchema = schema.create({
+        nik: schema.string({ trim: true }, [rules.unique({ table: 'pemohons', column: 'nik' })]),
+        nama: schema.string(),
+        user_id: schema.number(),
+      })
+
+      const pemohonData = await request.validate({
+        schema: pemohonSchema,
+        data: {
+          nik: request.input('nik'),
+          nama: request.input('nama'),
+          user_id: user.id,
+        },
+      })
+      console.log(user)
+      const pemohon = await Pemohon.create(pemohonData)
+
+      console.log(pemohon)
 
       const token = await auth.login(user)
 
