@@ -5,9 +5,10 @@ import User from 'App/Models/User'
 
 export default class UsersController {
   public async register({ request, auth, response }: HttpContextContract) {
+    console.log(request.input('username'))
     const userSchema = schema.create({
-      username: schema.string({ trim: true }, [
-        rules.unique({ table: 'users', column: 'username', caseInsensitive: true }),
+      username: schema.string({}, [
+        rules.unique({ table: 'users', column: 'username' })
       ]),
       password: schema.string({}, [rules.minLength(8)]),
       nama: schema.string({}, [rules.required()]),
@@ -33,15 +34,13 @@ export default class UsersController {
           user_id: user.id,
         },
       })
-      console.log(user)
-      const pemohon = await Pemohon.create(pemohonData)
-
-      console.log(pemohon)
+      await Pemohon.create(pemohonData)
 
       const token = await auth.login(user)
 
       return token
     } catch (error) {
+      console.log(error)
       return response.badRequest(error)
     }
   }

@@ -21,10 +21,10 @@ export default class PemohonsController {
       filterType == 1
         ? `AND date(tanggal_lahir) = '${filter}' `
         : filterType == 2
-        ? `AND extract(month from tanggal_lahir) = ${filter} `
-        : filterType == 3
-        ? `AND extract(year from tanggal_lahir) = ${filter} `
-        : ''
+          ? `AND extract(month from tanggal_lahir) = ${filter} `
+          : filterType == 3
+            ? `AND extract(year from tanggal_lahir) = ${filter} `
+            : ''
     const total = await Database.rawQuery(sql)
     sql += `ORDER BY id ASC LIMIT ${perPage} OFFSET ${parseInt(pageInput) * perPage}`
 
@@ -172,7 +172,6 @@ export default class PemohonsController {
 
       return response.status(200)
     } catch (error) {
-      console.log(error)
       return response.badRequest(error)
     }
   }
@@ -221,7 +220,6 @@ export default class PemohonsController {
 
       return response.status(200)
     } catch (e) {
-      console.log(e)
       return response.badRequest(e)
     }
   }
