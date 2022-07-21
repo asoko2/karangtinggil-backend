@@ -2,6 +2,7 @@ import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import { schema, rules } from '@ioc:Adonis/Core/Validator'
 import Pemohon from 'App/Models/Pemohon'
 import User from 'App/Models/User'
+import Hash from '@ioc:Adonis/Core/Hash'
 
 export default class UsersController {
   public async register({ request, auth, response }: HttpContextContract) {
@@ -86,5 +87,24 @@ export default class UsersController {
   public async check({ auth }) {
     await auth.use('api').check()
     return auth.use('api').isLoggedIn
+  }
+
+
+  public async password({ request, auth, response }: HttpContextContract) {
+    const password_verified = await Hash.verify(auth.user!.password, request.input('password_lama'))
+    if (!password_verified) {
+      return response.badRequest({ 'message': 'Password lama salah' })
+    }
+
+    const user = await User.find(auth.user?.id)
+    try {
+      user!.password = request.input('password_baru')
+      await user?.save()
+      console.log('sukses')
+      return response.status(200)
+    } catch (e) {
+      console.log('gagal')
+      return response.badRequest(e)
+    }
   }
 }

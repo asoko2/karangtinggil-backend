@@ -24,7 +24,9 @@ export default class PemohonsController {
           ? `AND extract(month from tanggal_lahir) = ${filter} `
           : filterType == 3
             ? `AND extract(year from tanggal_lahir) = ${filter} `
-            : ''
+            : filterType == 4
+              ? `AND date(created_at) = '${filter}' `
+              : ''
     const total = await Database.rawQuery(sql)
     sql += `ORDER BY id ASC LIMIT ${perPage} OFFSET ${parseInt(pageInput) * perPage}`
 
